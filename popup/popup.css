@@ -32,6 +32,22 @@
   color-scheme: light;
 }
 
+body[data-theme="dark"] {
+  --md-primary: #1f3d52;
+  --md-on-primary: #eef7ff;
+  --md-secondary-container: #2e4f64;
+  --md-on-secondary-container: #f2f8ff;
+  --md-surface: #11171b;
+  --md-surface-container-low: #172026;
+  --md-surface-container: #1c272e;
+  --md-surface-container-high: #23313a;
+  --md-on-surface: #edf3f7;
+  --md-on-surface-variant: #b9c7cf;
+  --md-outline: #455863;
+  --md-outline-variant: #32424c;
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }

@@ -43,6 +43,7 @@ const footnote = document.getElementById("footnote");
 
 function render(mode) {
   const selected = mode === "light" || mode === "dark" ? `smart-${mode}` : mode;
+  document.body.dataset.theme = selected.endsWith("-dark") ? "dark" : "light";
   segments.forEach((seg) => {
     seg.setAttribute("aria-checked", String(seg.dataset.mode === selected));
   });
