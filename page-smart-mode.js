@@ -245,7 +245,7 @@
     const isWorkspace = host === "docs.google.com" || host === "drive.google.com";
     const isSheets = host === "docs.google.com" && location.pathname.includes("/spreadsheets/");
     const pageFilter = isSheets
-      ? "invert(1) hue-rotate(180deg) saturate(0.40) brightness(1.05) contrast(1.05)"
+      ? "invert(1) hue-rotate(180deg) saturate(0.30) brightness(1.0) contrast(1.05)"
       : "invert(1) hue-rotate(180deg)";
     let style = document.getElementById(googleWorkspaceStyleId);
 
