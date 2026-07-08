@@ -1,0 +1,207 @@
+:root {
+  /* ---- Source palette ---- */
+  --swatch-1: #355872; /* deep blue   */
+  --swatch-2: #7AAACE; /* mid blue    */
+  --swatch-3: #9CD5FF; /* light blue  */
+  --swatch-4: #F7F8F0; /* warm white  */
+
+  /* ---- M3 role mapping ---- */
+  --md-primary: var(--swatch-1);
+  --md-on-primary: var(--swatch-4);
+  --md-primary-container: var(--swatch-3);
+  --md-on-primary-container: #16324a;
+
+  --md-secondary: var(--swatch-2);
+  --md-secondary-container: #e4f2ff;
+  --md-on-secondary-container: #1c3f57;
+
+  --md-surface: var(--swatch-4);
+  --md-surface-container-low: #fdfdf7;
+  --md-surface-container: #f1f2ea;
+  --md-surface-container-high: #e9ebe0;
+
+  --md-on-surface: #1b2226;
+  --md-on-surface-variant: #4c5761;
+  --md-outline: #c6cad0;
+  --md-outline-variant: #dfe2de;
+
+  --md-shape-full: 100px;
+  --md-shape-lg: 16px;
+  --md-shape-md: 12px;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  background: var(--md-surface);
+  font-family: "Google Sans Text", "Roboto", system-ui, sans-serif;
+  color: var(--md-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- Top bar ---------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.app-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-shape-md);
+  background: rgba(247, 248, 240, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-icon svg {
+  fill: var(--md-on-primary);
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(247, 248, 240, 0.78);
+}
+
+/* ---------------- Content ---------------- */
+
+.content {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------------- Segmented button (M3) ---------------- */
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--md-shape-md);
+  overflow: hidden;
+  background: var(--md-surface-container-low);
+}
+
+.segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  border: none;
+  border-bottom: 1px solid var(--md-outline);
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.segment:last-child {
+  border-bottom: none;
+}
+
+.segment svg {
+  fill: currentColor;
+}
+
+.segment-check {
+  display: none;
+  width: 16px;
+  height: 16px;
+}
+
+.segment:hover {
+  background: rgba(53, 88, 114, 0.06);
+}
+
+.segment[aria-checked="true"] {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.segment[aria-checked="true"] .segment-icon {
+  display: none;
+}
+
+.segment[aria-checked="true"] .segment-check {
+  display: inline-flex;
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: -2px;
+}
+
+/* ---------------- Status card ---------------- */
+
+.status-card {
+  background: var(--md-surface-container);
+  border-radius: var(--md-shape-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-line {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--md-on-surface);
+}
+
+.status-detail {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--md-on-surface-variant);
+}
+
+/* ---------------- Footnote ---------------- */
+
+.footnote {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--md-on-surface-variant);
+  padding: 0 2px;
+  min-height: 1px;
+}
+
+.footnote.warn {
+  color: var(--md-primary);
+}
