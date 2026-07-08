@@ -12,6 +12,7 @@
     applyingHints: false,
     hintTimer: 0
   };
+  const googleWorkspaceStyleId = "theme-sync-google-workspace";
   const colorQuery = /\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)/i;
   const hintAttrs = [
     "data-mode",
@@ -239,6 +240,47 @@
     state.hintTimer = setTimeout(() => applyThemeHints(), 50);
   }
 
+  function applyGoogleWorkspaceFallback() {
+    const host = location.hostname;
+    const isWorkspace = host === "docs.google.com" || host === "drive.google.com";
+    const isSheets = host === "docs.google.com" && location.pathname.includes("/spreadsheets/");
+    const pageFilter = isSheets
+      ? "invert(1) hue-rotate(180deg) saturate(0.40) brightness(1.05) contrast(1.05)"
+      : "invert(1) hue-rotate(180deg)";
+    let style = document.getElementById(googleWorkspaceStyleId);
+
+    if (!isWorkspace || state.mode !== "dark") {
+      if (style) style.remove();
+      return;
+    }
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = googleWorkspaceStyleId;
+      document.documentElement.appendChild(style);
+    }
+
+    style.textContent = `
+      html,
+      body {
+        background: #0b0d0e !important;
+      }
+
+      html {
+        filter: ${pageFilter} !important;
+      }
+
+      img,
+      video {
+        filter: ${pageFilter} !important;
+      }
+
+      * {
+        text-shadow: none !important;
+      }
+    `;
+  }
+
   function notifyMediaLists() {
     state.mediaLists.forEach((item) => {
       const matches = queryMatch(item.text);
@@ -275,6 +317,7 @@
     state.mode = event.data.mode === "light" || event.data.mode === "dark" ? event.data.mode : "off";
     tryPreferenceAPI();
     applyThemeHints();
+    applyGoogleWorkspaceFallback();
     rewriteStyles();
     notifyMediaLists();
   });
