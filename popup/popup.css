@@ -182,6 +182,67 @@ body {
   outline-offset: -2px;
 }
 
+/* ---------------- Site toggle ---------------- */
+
+.site-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--md-shape-md);
+  background: var(--md-surface-container-low);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-toggle[hidden] {
+  display: none;
+}
+
+.site-toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--md-primary);
+  flex: 0 0 auto;
+}
+
+.site-button {
+  justify-content: flex-start;
+}
+
+.site-button:hover {
+  background: var(--md-surface-container);
+}
+
+.site-button:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: -2px;
+}
+
+.site-toggle-title,
+.site-toggle-detail {
+  display: block;
+}
+
+.site-toggle-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--md-on-surface);
+}
+
+.site-toggle-detail {
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--md-on-surface-variant);
+  overflow-wrap: anywhere;
+}
+
 /* ---------------- Status card ---------------- */
 
 .status-card {

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Theme Sync - Dark/Light Mode Override",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "One click makes websites follow your preferred light or dark theme.",
   "permissions": ["storage", "tabs", "scripting", "debugger"],
   "host_permissions": ["<all_urls>"],

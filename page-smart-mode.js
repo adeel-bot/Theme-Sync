@@ -10,7 +10,8 @@
     originalHints: new WeakMap(),
     touchedHints: new Set(),
     applyingHints: false,
-    hintTimer: 0
+    hintTimer: 0,
+    siteTune: null
   };
   const googleWorkspaceStyleId = "theme-sync-google-workspace";
   const colorQuery = /\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)/i;
@@ -54,6 +55,36 @@
     ...hintAttrs.map((attr) => `[${attr}]`),
     ...themeValuePairs.flatMap(([dark, light]) => [`.${dark}`, `.${light}`])
   ].join(",");
+  const defaultSiteTune = {
+    background: "#0b0d0e",
+    brightness: 1,
+    contrast: 1.05,
+    saturation: 0.3,
+    mediaBrightness: 1,
+    vectorBrightness: 1.15,
+    preserveMedia: true,
+    preserveVectors: true
+  };
+
+  function clamp(value, min, max) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return min;
+    return Math.min(max, Math.max(min, number));
+  }
+
+  function normalizeSiteTune(value) {
+    const tune = value && typeof value === "object" ? value : {};
+    return {
+      background: /^#[0-9a-f]{6}$/i.test(tune.background) ? tune.background : defaultSiteTune.background,
+      brightness: clamp(tune.brightness ?? defaultSiteTune.brightness, 0.65, 1.35),
+      contrast: clamp(tune.contrast ?? defaultSiteTune.contrast, 0.75, 1.45),
+      saturation: clamp(tune.saturation ?? defaultSiteTune.saturation, 0, 1.4),
+      mediaBrightness: clamp(tune.mediaBrightness ?? defaultSiteTune.mediaBrightness, 0.65, 1.35),
+      vectorBrightness: clamp(tune.vectorBrightness ?? defaultSiteTune.vectorBrightness, 0.65, 1.6),
+      preserveMedia: tune.preserveMedia !== false,
+      preserveVectors: tune.preserveVectors !== false
+    };
+  }
 
   function queryMatch(query) {
     if (state.mode === "off" || !colorQuery.test(query)) return state.matchMedia(query).matches;
@@ -243,13 +274,58 @@
   function applyGoogleWorkspaceFallback() {
     const host = location.hostname;
     const isWorkspace = host === "docs.google.com" || host === "drive.google.com";
+    const isPinch = host === "getpinch.com.au" || host === "web.getpinch.com.au";
     const isSheets = host === "docs.google.com" && location.pathname.includes("/spreadsheets/");
-    const pageFilter = isSheets
-      ? "invert(1) hue-rotate(180deg) saturate(0.30) brightness(1.0) contrast(1.05)"
-      : "invert(1) hue-rotate(180deg)";
+    const tune = normalizeSiteTune(state.siteTune || (isSheets ? defaultSiteTune : { saturation: 1, contrast: 1, brightness: 1 }));
+    const pageFilter = `invert(1) hue-rotate(180deg) saturate(${tune.saturation}) brightness(${tune.brightness}) contrast(${tune.contrast})`;
+    const mediaFilter = tune.preserveMedia ? `${pageFilter} brightness(${tune.mediaBrightness})` : `brightness(${tune.mediaBrightness})`;
+    const vectorFilter = tune.preserveVectors ? `${pageFilter} brightness(${tune.vectorBrightness})` : `brightness(${tune.vectorBrightness})`;
+    const canvasFilter = isSheets ? "none" : mediaFilter;
+    const pinchCss = isPinch
+      ? `
+      html,
+      body {
+        overflow-x: clip !important;
+      }
+
+      body,
+      body * {
+        color: #111 !important;
+      }
+
+      body,
+      main,
+      section,
+      article,
+      aside,
+      header,
+      footer,
+      nav,
+      .container,
+      .content,
+      .main-content,
+      .page-content,
+      .card,
+      .panel,
+      .well,
+      .modal-content,
+      .table,
+      table,
+      thead,
+      tbody,
+      tr,
+      td,
+      th,
+      input,
+      select,
+      textarea {
+        background-color: #fff !important;
+      }
+      `
+      : "";
     let style = document.getElementById(googleWorkspaceStyleId);
 
-    if (!isWorkspace || state.mode !== "dark") {
+    if ((!isWorkspace && !isPinch) || state.mode !== "dark") {
       if (style) style.remove();
       return;
     }
@@ -261,23 +337,35 @@
     }
 
     style.textContent = `
-      html,
-      body {
-        background: #0b0d0e !important;
+      html {
+        background: ${tune.background} !important;
       }
 
-      html {
+      body {
+        background: ${tune.background} !important;
         filter: ${pageFilter} !important;
       }
 
       img,
-      video {
-        filter: ${pageFilter} !important;
+      video,
+      image,
+      [style*="background-image"] {
+        filter: ${mediaFilter} !important;
+      }
+
+      svg {
+        filter: ${vectorFilter} !important;
+      }
+
+      canvas {
+        filter: ${canvasFilter} !important;
       }
 
       * {
         text-shadow: none !important;
       }
+
+      ${pinchCss}
     `;
   }
 
@@ -315,6 +403,7 @@
   window.addEventListener("message", (event) => {
     if (event.source !== window || event.data?.source !== "scheme-force") return;
     state.mode = event.data.mode === "light" || event.data.mode === "dark" ? event.data.mode : "off";
+    state.siteTune = normalizeSiteTune(event.data.siteTune);
     tryPreferenceAPI();
     applyThemeHints();
     applyGoogleWorkspaceFallback();

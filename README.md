@@ -4,6 +4,8 @@ Theme Sync is a Chrome extension for making websites follow your preferred color
 
 Pick light or dark once, and Theme Sync pushes that preference across the sites you visit so you do not have to hunt for each site's theme toggle manually.
 
+Current version: `1.1.0`.
+
 ## What It Does
 
 Theme Sync gives you one place to choose how the web should look:
@@ -13,8 +15,63 @@ Theme Sync gives you one place to choose how the web should look:
 - Smart Dark: make sites prefer dark mode without Chrome warnings.
 - Native Light: stronger light override for stubborn sites.
 - Native Dark: stronger dark override for stubborn sites.
+- Per-site off switch: remember sites where Theme Sync should not apply overrides.
+- Site tuner: adjust supported sites with saved per-site dark backgrounds, media, icons/vectors, brightness, contrast, and saturation settings.
+- Expanded coverage: supports more websites, including sites with custom theme implementations.
 
 The goal is simple: one click, and compatible websites follow your preferred light or dark theme.
+
+## Version 1.1.0
+
+- Added per-site opt-out so a specific site can keep its own theme while the global mode stays on.
+- Added a draggable Site Tuner for supported websites.
+- Site Tuner settings are saved per site origin in extension storage, so changing one site does not affect another.
+- Added dark background presets plus brightness, contrast, saturation, media brightness, and icon/vector brightness controls.
+- Added separate controls to preserve or tune images and icons/vectors when a dark override makes site content difficult to see.
+- The tuner opens only while a dark mode is active, includes an explicit Save button, and remembers its position and open/closed state per site.
+- Added support for more websites with custom theme implementations, including sites that do not expose a standard dark-mode switch.
+
+## Screenshots
+
+### Main popup in dark mode
+
+![Theme Sync popup in dark mode](docs/screenshots/popup-dark.png)
+
+### Main popup in light mode
+
+![Theme Sync popup in light mode](docs/screenshots/popup-light.png)
+
+### Per-site Site Tuner
+
+![Theme Sync Site Tuner](docs/screenshots/site-tuner.png)
+
+### Google Sheets with saved site tuning
+
+![Theme Sync tuner on Google Sheets](docs/screenshots/google-sheets-tuner.png)
+
+## Site-specific controls
+
+Theme Sync keeps global mode selection separate from site-specific preferences:
+
+- Use **Turn off for this site** when a site should keep its own appearance. The choice is remembered for that site while the global mode remains enabled elsewhere.
+- Use **Open site tuner** in a supported dark mode to adjust the site's background and content treatment.
+- Choose a preset or tune the sliders, then press **Save**. Later saves update that site's stored settings.
+- Close the tuner with its window-style close button. Closing it hides the controls without removing saved settings.
+
+Settings are stored by site origin using Chrome extension storage. They do not change the settings for other sites.
+
+## Privacy and Safety
+
+Theme Sync is a visual customization tool. It changes page styling locally in the browser and stores theme preferences locally through Chrome extension storage.
+
+Theme Sync does not:
+
+- Collect, upload, sell, or share page content, credentials, browsing history, or personal data.
+- Bypass logins, paywalls, DRM, or other access controls.
+- Download or stream protected content.
+- Modify website data or perform actions on a user's behalf.
+
+The extension's page access is used only to apply the user's selected visual theme and site-specific styling preferences.
 
 ## Smart Mode
 

@@ -6,6 +6,7 @@ const STYLE_ORIGIN = "USER";
 const attachedTabs = new Set();
 const detachingTabs = new Set();
 let mode = "off";
+let disabledSites = [];
 
 function isInjectableTab(tab) {
   if (!tab || !tab.id || tab.id === chrome.tabs.TAB_ID_NONE) return false;
@@ -19,14 +20,43 @@ function parseMode(value) {
   return match ? { type: match[1], scheme: match[2] } : { type: "off", scheme: "off" };
 }
 
+function originFromUrl(url) {
+  try {
+    const parsed = new URL(url || "");
+    return /^https?:$/.test(parsed.protocol) ? parsed.origin : "";
+  } catch {
+    return "";
+  }
+}
+
+function isSiteDisabled(url) {
+  const origin = originFromUrl(url);
+  return Boolean(origin && disabledSites.includes(origin));
+}
+
+function canTuneSite(url) {
+  try {
+    const host = new URL(url || "").hostname;
+    return ["docs.google.com", "drive.google.com", "getpinch.com.au", "web.getpinch.com.au"].includes(host);
+  } catch {
+    return false;
+  }
+}
+
 function cssFor(schemeValue) {
   return `:root { color-scheme: ${schemeValue} !important; }`;
 }
 
 async function loadMode() {
-  const stored = await chrome.storage.local.get("mode");
+  const stored = await chrome.storage.local.get(["mode", "disabledSites"]);
   mode = stored.mode || "off";
+  disabledSites = Array.isArray(stored.disabledSites) ? stored.disabledSites : [];
   return mode;
+}
+
+async function getActiveTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab || null;
 }
 
 async function removeSchemeCss(tabId) {
@@ -100,9 +130,10 @@ async function detachTab(tabId) {
 }
 
 async function applyToTab(tabId) {
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
   const active = parseMode(mode);
 
-  if (active.type === "off") {
+  if (active.type === "off" || isSiteDisabled(tab?.url || tab?.pendingUrl)) {
     await removeSchemeCss(tabId);
     await sendSmartMode(tabId, "off");
     await detachTab(tabId);
@@ -137,6 +168,20 @@ async function setMode(newMode) {
   mode = newMode;
   await chrome.storage.local.set({ mode });
   await applyToAllTabs();
+}
+
+async function setActiveSiteDisabled(disabled) {
+  const tab = await getActiveTab();
+  const origin = originFromUrl(tab?.url || tab?.pendingUrl);
+  if (!origin) return { ok: false };
+
+  disabledSites = disabled
+    ? Array.from(new Set([...disabledSites, origin]))
+    : disabledSites.filter((site) => site !== origin);
+
+  await chrome.storage.local.set({ disabledSites });
+  await applyToTab(tab.id);
+  return { ok: true, origin };
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -185,8 +230,27 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     loadMode().then((m) => sendResponse({ mode: m }));
     return true;
   }
+  if (message?.type === "GET_STATE") {
+    Promise.all([loadMode(), getActiveTab()]).then(([m, tab]) => {
+      const origin = originFromUrl(tab?.url || tab?.pendingUrl);
+      const url = tab?.url || tab?.pendingUrl || "";
+      sendResponse({
+        mode: m,
+        siteDisabled: isSiteDisabled(origin),
+        siteOrigin: origin,
+        siteLabel: origin ? new URL(origin).hostname : "",
+        canToggleSite: Boolean(origin),
+        canTuneSite: canTuneSite(url)
+      });
+    });
+    return true;
+  }
   if (message?.type === "SET_MODE") {
     setMode(message.mode).then(() => sendResponse({ ok: true }));
+    return true;
+  }
+  if (message?.type === "SET_SITE_DISABLED") {
+    setActiveSiteDisabled(Boolean(message.disabled)).then(sendResponse);
     return true;
   }
   return false;
